@@ -34,6 +34,8 @@ class LMStyle(Enum):
 
     TogetherAI = "TogetherAI"
 
+    GLLM = "GLLM"
+
 
 @dataclass
 class LanguageModel:
@@ -62,6 +64,13 @@ LanguageModelList: list[LanguageModel] = [
         "meta-llama/Meta-Llama-3-70B",
         "LLama3-70b-Base",
         LMStyle.GenericBase,
+        datetime(2023, 1, 1),
+        link="https://huggingface.co/meta-llama/Meta-Llama-3-70B",
+    ),    
+        LanguageModel(
+        "meta-llama/Meta-Llama-3-70B-GLLM",
+        "LLama3-70b-Base-GLLM",
+        LMStyle.GLLM,
         datetime(2023, 1, 1),
         link="https://huggingface.co/meta-llama/Meta-Llama-3-70B",
     ),

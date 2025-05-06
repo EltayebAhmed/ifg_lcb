@@ -1,4 +1,5 @@
 import json
+import re
 
 try:
     from anthropic import HUMAN_PROMPT, AI_PROMPT
@@ -172,6 +173,51 @@ with open("lcb_runner/prompts/few_shot_examples/generation/func.json") as f:
 with open("lcb_runner/prompts/few_shot_examples/generation/stdin.json") as f:
     stdin = json.load(f)
 
+with open("lcb_runner/prompts/few_shot_examples/generation/func_ifg.json") as f:
+    func_ifg = json.load(f)
+
+with open("lcb_runner/prompts/few_shot_examples/generation/stdin_ifg.json") as f:
+    stdin_ifg = json.load(f)
+
+
+def get_base_model_question_template_answer_ifg(question: CodeGenerationProblem):
+    if question.starter_code:
+        examples_json = func_ifg
+    else:
+        examples_json = stdin_ifg
+
+    def get_example_prompt(example):
+        prompt = ""
+        prompt += "### Question\n"
+        prompt += example["question"]
+        prompt += "\n\n"
+        if question.starter_code:
+            prompt += "### Starter Code\n"
+            prompt += example["sample_code"]
+            prompt += "\n\n"
+        prompt += "### Answer\n\n"
+        prompt += example["answer"]
+        if example["answer"]:
+            prompt += "\n\n"
+        return prompt
+
+
+    prompt = ("Observe that when we solve the following coding problems we will " +
+        "heavily use comments to explain the code. Each small part of the code will be "
+        " preceeded by a comment block that describes what the next line or few lines " + 
+        "of code do. " +
+        "Each comment block will start with ### and end with ###. Comment blocks may " +
+        "span multiple lines.")
+    prompt += "\n\n"
+    prompt += get_example_prompt(examples_json[0])
+    prompt += get_example_prompt(
+        {
+            "question": question.question_content,
+            "sample_code": question.starter_code,
+            "answer": "",
+        }
+    )
+    return prompt
 
 def get_base_model_question_template_answer(question: CodeGenerationProblem):
     if question.starter_code:
@@ -204,7 +250,6 @@ def get_base_model_question_template_answer(question: CodeGenerationProblem):
         }
     )
     return prompt
-
 
 def format_prompt_generation(
     question: CodeGenerationProblem, LanguageModelStyle: LMStyle
@@ -337,6 +382,10 @@ def format_prompt_generation(
 
     if LanguageModelStyle == LMStyle.GenericBase:
         prompt = get_base_model_question_template_answer(question)
+        return prompt
+
+    if LanguageModelStyle == LMStyle.GLLM:
+        prompt = get_base_model_question_template_answer_ifg(question)
         return prompt
 
     raise NotImplementedError(

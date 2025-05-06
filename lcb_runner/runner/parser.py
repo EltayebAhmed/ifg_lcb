@@ -131,6 +131,30 @@ def get_args():
         default=None,
         help="End date for the contest to filter the evaluation file (format - YYYY-MM-DD)",
     )
+    parser.add_argument(
+        "--server-address",
+        type=str,
+        default="localhost:8181",
+        help="Server address for gllm",
+    )
+    parser.add_argument(
+        "--use-ifg",
+        action="store_true",
+        help="Use IFG for sampling",
+        default=False,
+    )
+    parser.add_argument(
+        '--ifg-even-temperature',
+        type=float,
+        default=0.8,
+        help="Temperature for sampling in IFG even indices",
+    )
+    parser.add_argument(
+        '--ifg-odd-temperature',
+        type=float,
+        default=0.2,
+        help="Temperature for sampling in IFG odd indices",
+    )
 
     args = parser.parse_args()
 

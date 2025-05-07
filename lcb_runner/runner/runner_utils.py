@@ -54,8 +54,8 @@ def build_runner(args, model: LanguageModel):
         raise NotImplementedError(
             f"Runner for language model style {model.model_style} not implemented yet"
         )
-    elif model.model_style == LMStyle.GLLM:
-        from lcb_runner.runner.gllm_runner import GLLMMRunnerIFG
+    elif model.model_style == LMStyle.IFG:
+        from lcb_runner.runner.ifg_runner import GLLMMRunnerIFG
 
         return GLLMMRunnerIFG(args, model)
     else:

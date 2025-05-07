@@ -134,7 +134,7 @@ def get_args():
     parser.add_argument(
         "--server-address",
         type=str,
-        default="localhost:8181",
+        default="https://openrouter.ai/api",
         help="Server address for gllm",
     )
     parser.add_argument(
@@ -146,14 +146,29 @@ def get_args():
     parser.add_argument(
         '--ifg-even-temperature',
         type=float,
-        default=0.8,
-        help="Temperature for sampling in IFG even indices",
+        default=0.2,
+        help="Temperature for sampling in IFG even indices"
+        "This will typically correpond to the temperature for code.",
+
     )
     parser.add_argument(
         '--ifg-odd-temperature',
         type=float,
-        default=0.2,
-        help="Temperature for sampling in IFG odd indices",
+        default=0.7,
+        help="Temperature for sampling in IFG odd indices"
+        "This will typically correpond to the temperature for comments.",
+    )
+    parser.add_argument(
+        "--ifg-separator",
+        type=str,
+        default="###",
+        help="Separator for IFG sampling",
+    )
+
+    parser.add_argument(
+        "--ifg-termination-str",
+        type=str,
+        default="End of code",
     )
 
     args = parser.parse_args()

@@ -207,7 +207,8 @@ def get_base_model_question_template_answer_ifg(question: CodeGenerationProblem)
         " preceeded by a comment block that describes what the next line or few lines " + 
         "of code do. " +
         "Each comment block will start with ### and end with ###. Comment blocks may " +
-        "span multiple lines.")
+        "span multiple lines. Note how the code ends with the followin comment block that " +
+        "says ### End of code. ###")
     prompt += "\n\n"
     prompt += get_example_prompt(examples_json[0])
     prompt += get_example_prompt(
@@ -384,7 +385,7 @@ def format_prompt_generation(
         prompt = get_base_model_question_template_answer(question)
         return prompt
 
-    if LanguageModelStyle == LMStyle.GLLM:
+    if LanguageModelStyle == LMStyle.IFG:
         prompt = get_base_model_question_template_answer_ifg(question)
         return prompt
 

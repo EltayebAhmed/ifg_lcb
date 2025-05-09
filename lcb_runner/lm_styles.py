@@ -70,7 +70,7 @@ LanguageModelList: list[LanguageModel] = [
     ),    
         LanguageModel(
         "generic-ifg-model",
-        "LLama3-70b-Base-IFG",
+        "Generic-Model-IFG",
         LMStyle.IFG,
         datetime(2023, 1, 1),
         link="https://huggingface.co/meta-llama/Meta-Llama-3-70B",

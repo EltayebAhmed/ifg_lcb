@@ -26,6 +26,7 @@ class BaseRunner(ABC):
         else:
             self.cache_path = None
             self.cache = None
+        print(f"Cache path: {self.cache_path}") 
 
     def save_cache(self):
         if self.args.use_cache:

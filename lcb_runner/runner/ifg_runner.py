@@ -8,16 +8,16 @@ except ImportError as e:
 import dataclasses
 import itertools
 import json
-from math import exp
 from multiprocessing.pool import ThreadPool
 import os
-from re import I
 
 from vllm import SamplingParams
+from datetime import datetime
 
 import gllm
 from lcb_runner.runner.base_runner import BaseRunner
-
+from lcb_runner.lm_styles import LMStyle
+import time
 
 class VLLMLookingOutput:
     # Looks like a VLLM LLM.generate output.
@@ -34,6 +34,10 @@ class VLLMLookingOutput:
 
 MODEL = "Qwen/Qwen2.5-Coder-32B"
 
+import threading
+lock = threading.Lock()
+counter = 0
+last_time = time.time()
 
 class GLLMMRunnerIFG(BaseRunner):
     def __init__(self, args, model):
@@ -43,17 +47,12 @@ class GLLMMRunnerIFG(BaseRunner):
         )
 
         self._model_identifier = model_tokenizer_path
-        if self._model_identifier.endswith("-IFG"):
-            self.mode = "IFG"
-            self._model_identifier = self._model_identifier[:-4]
 
-        elif self._model_identifier.endswith("-GLLM"):
-            self.mode = "GLLM"
-            self._model_identifier = self._model_identifier[:-5]
-        else:
-            raise ValueError(
-                f"Model identifier {self._model_identifier} does not end with -IFG or -GLLM"
-            )
+        assert model.model_style in [
+            LMStyle.GLLM,
+            LMStyle.IFG,], f"Model style {model.model_style} not supported for GLLM runner"
+
+        self.model_style = model.model_style
 
         api_key = os.environ.get("GLLM_API_KEY", None)
         self.llm = gllm.GLLM(
@@ -68,6 +67,7 @@ class GLLMMRunnerIFG(BaseRunner):
             self.llm.wait_for_health()
         except Exception as e:
             print(f"Error loading model {MODEL}: {e}")
+            print("Probably not using a GLLM server, no need to load model")
 
         self.sampling_params = SamplingParams(
             n=self.args.n,
@@ -111,8 +111,16 @@ class GLLMMRunnerIFG(BaseRunner):
             else:
                 for index, vllm_output in zip(remaining_indices, vllm_outputs):
                     outputs[index] = [o.text for o in vllm_output.outputs]
-        print("Batch of %d prompts completed" % len(prompts))
-        breakpoint()
+        with lock:
+            global counter
+            global last_time
+            counter += len(prompts)
+            print(f"{datetime.now().strftime('%m/%d - %H:%M:%S')} : Counter: {counter}", flush=True)
+            new_time = time.time()
+            print(f"seconds/sample = {(new_time - last_time) / len(prompts)}", flush=True)
+            print(f"samples/second = {len(prompts) / (new_time - last_time)}", flush=True)
+            last_time = new_time
+            
         return outputs
 
     def _generate_batch(
@@ -122,7 +130,7 @@ class GLLMMRunnerIFG(BaseRunner):
         n_prompts = len(prompts)
         expanded_prompts = [[prompt] * sampling_params.n for prompt in prompts]
         expanded_prompts = sum(expanded_prompts, [])
-
+        print(f"Expanded {n_prompts} prompts to {len(expanded_prompts)}", flush=True)
         # prepare arguments for each prompt
         args_list = [
             (
@@ -138,10 +146,18 @@ class GLLMMRunnerIFG(BaseRunner):
             for prompt in expanded_prompts
         ]
 
-        # run in parallel threads
-        with ThreadPool() as pool:
-            results = pool.starmap(ifg_sample_single, args_list)
+        if self.model_style == LMStyle.GLLM:
+            sampling_function = vanilla_sample_single
+        elif self.model_style == LMStyle.IFG:
+            sampling_function = ifg_sample_single
+        else:
+            raise ValueError(f"Unknown mode {self.mode}")
 
+        # Run in parallel threads.
+        with ThreadPool() as pool:
+            results = pool.starmap(sampling_function, args_list)
+        # Serial version, nice for debugging.
+        # results = [sampling_function(*args) for args in args_list]
         results = [
             results[i : i + sampling_params.n]
             for i in range(0, len(results), sampling_params.n)
@@ -199,10 +215,33 @@ def ifg_sample_single(
 
     return response
 
+def vanilla_sample_single(
+    sampling_params: SamplingParams,
+    prompt: str,
+    model: gllm.GLLM,
+    *args,
+    **kwargs,
+) -> str:
+
+    gllm_response = model.get_completions(
+        model=MODEL,
+        prompt=prompt,
+        max_tokens=sampling_params.max_tokens,
+        temperature=sampling_params.temperature,
+        top_p=sampling_params.top_p,
+        frequency_penalty=sampling_params.frequency_penalty,
+        presence_penalty=sampling_params.presence_penalty,
+        stop=sampling_params.stop,
+        n=1,
+        return_mode="raw",
+    )
+
+    return gllm_response.choices[0].text
 
 if __name__ == "__main__":
     from lcb_runner.runner import parser
     from lcb_runner.lm_styles import LanguageModelStore
+
 
     args = parser.get_args()
     model = LanguageModelStore[args.model]

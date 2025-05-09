@@ -8,6 +8,12 @@ from lcb_runner.utils.scenarios import Scenario
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        "--output_dir",
+        type=str,
+        default="output",
+        help="Directory to save the output files",
+    )
+    parser.add_argument(
         "--model",
         type=str,
         default="gpt-3.5-turbo-0301",
@@ -77,7 +83,8 @@ def get_args():
     parser.add_argument("--continue_existing", action="store_true")
     parser.add_argument("--continue_existing_with_eval", action="store_true")
     parser.add_argument(
-        "--use_cache", action="store_true", help="Use cache for generation"
+        "--use_cache", action="store_true", help="Use cache for generation",
+        default=False,
     )
     parser.add_argument(
         "--cache_batch_size", type=int, default=100, help="Batch size for caching"
@@ -154,7 +161,7 @@ def get_args():
     parser.add_argument(
         '--ifg-odd-temperature',
         type=float,
-        default=0.7,
+        default=0.5,
         help="Temperature for sampling in IFG odd indices"
         "This will typically correpond to the temperature for comments.",
     )

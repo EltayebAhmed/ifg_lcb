@@ -7,7 +7,7 @@ def extract_code(model_output: str, lmstyle: LMStyle):
         indexlines = [i for i, line in enumerate(outputlines) if "PYTHON]" in line]
         if len(indexlines) < 2:
             indexlines = [i for i, line in enumerate(outputlines) if "```" in line]
-    elif lmstyle == LMStyle.GenericBase:
+    elif lmstyle == LMStyle.GenericBase or LMStyle.IFG or LMStyle.GLLM:
         return model_output.strip()
     else:
         indexlines = [i for i, line in enumerate(outputlines) if "```" in line]

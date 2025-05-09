@@ -24,10 +24,13 @@ def main():
         print(f"Running with {len(benchmark)} instances in debug mode")
         benchmark = benchmark[:15]
 
-    output_path = get_output_path(model.model_repr, args)
-    eval_file = output_path.replace(".json", "_eval.json")
-    eval_all_file = output_path.replace(".json", "_eval_all.json")
-
+    # output_path = get_output_path(model.model_repr, args)
+    # eval_file = output_path.replace(".json", "_eval.json")
+    # eval_all_file = output_path.replace(".json", "_eval_all.json")
+    output_path = os.path.join(args.output_dir, "results.json")
+    eval_file = os.path.join(args.output_dir, "eval.json")
+    eval_all_file = os.path.join(args.output_dir, "eval_all.json")
+    
     if args.continue_existing or args.continue_existing_with_eval:
         if os.path.exists(output_path):
             with open(output_path, "r") as f:
@@ -89,19 +92,7 @@ def main():
     with open(output_path, "w") as f:
         json.dump(save_results, f, indent=4)
 
-    # for i in range(len(combined_results)):
-    #     for j in range(len(combined_results[i][1])):
-    #         if "def solve()" in combined_results[i][1][j]:
-    #             from lcb_runner.utils.extraction_utils import extract_code, LMStyle
 
-    #             combined_results[i][1][j] = extract_code(
-    #                 combined_results[i][0][j], LMStyle.Gemini
-    #             )
-    #             if "\nsolve()" not in combined_results[i][1][j]:
-    #                 combined_results[i][1][j] += "\n\nsolve()"
-
-    #                 # combined_results[i][1][j] += "\n\nsolve()"
-    #                 print(combined_results[i][1][j])
 
     if args.evaluate:
         if args.continue_existing_with_eval and os.path.exists(eval_all_file):

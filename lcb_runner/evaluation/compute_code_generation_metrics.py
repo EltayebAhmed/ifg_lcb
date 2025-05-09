@@ -18,6 +18,7 @@ from tqdm import tqdm
 
 from lcb_runner.evaluation.testing_util import run_test
 from lcb_runner.evaluation.pass_k_utils import compute_metrics_from_results
+import traceback
 
 
 def _temp_run(sample, generation, debug, result, metadata_list, timeout):
@@ -124,7 +125,6 @@ def evaluate_generations(
     """
 
     # generations are code generations in the same order of the dataset
-
     inputs = [
         [(generations_list[index], samples_list[index], debug, timeout), index]
         for index in range(len(generations_list))

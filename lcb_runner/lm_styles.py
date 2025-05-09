@@ -69,11 +69,18 @@ LanguageModelList: list[LanguageModel] = [
         link="https://huggingface.co/meta-llama/Meta-Llama-3-70B",
     ),    
         LanguageModel(
-        "meta-llama/llama-3-70b-IFG",
+        "generic-ifg-model",
         "LLama3-70b-Base-IFG",
         LMStyle.IFG,
         datetime(2023, 1, 1),
         link="https://huggingface.co/meta-llama/Meta-Llama-3-70B",
+    ),
+    LanguageModel(
+        "generic-vanilla-gllm",
+        "Generic-Vanilla-GLLM",
+        LMStyle.GLLM,
+        datetime(2023, 1, 1),
+        link="https://yolo",
     ),
     LanguageModel(
         "meta-llama/Meta-Llama-3-8B",

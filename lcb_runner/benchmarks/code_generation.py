@@ -1,5 +1,6 @@
 import json
 import zlib
+import os
 import pickle
 import base64
 from enum import Enum
@@ -120,10 +121,29 @@ class CodeGenerationProblem:
             ),
         }
 
-
+CACHE_PATH = "cache/data/code_generation_dataset_{hash}.pkl"
 def load_code_generation_dataset(release_version="release_v1", start_date=None, end_date=None) -> list[CodeGenerationProblem]:
     dataset = load_dataset("livecodebench/code_generation_lite", split="test", version_tag=release_version, trust_remote_code=True)
-    dataset = [CodeGenerationProblem(**p) for p in dataset]  # type: ignore
+    dataset_args_hash = f"{release_version}"
+    hashed_cache_path = CACHE_PATH.format(hash=dataset_args_hash)
+
+    if os.path.exists(hashed_cache_path):
+        with open(hashed_cache_path, "rb") as f:
+            dataset = pickle.load(f)
+            print(f"Loaded {len(dataset)} problems from cache at {hashed_cache_path}")
+
+        if release_version == "release_latest":
+            print(f"Release version is <{release_version}>. Loading a version that "
+            "isn't fixed from cache is a little sketchy. Happy debugging!") 
+    else:
+        
+        dataset = [CodeGenerationProblem(**p) for p in dataset]  # type: ignore
+        os.makedirs(os.path.dirname(hashed_cache_path), exist_ok=True)
+        # Save the dataset to cache
+        with open(hashed_cache_path, "wb") as f:
+            pickle.dump(dataset, f)
+            print(f"Saved {len(dataset)} problems to cache")
+
     if start_date is not None:
         p_start_date = datetime.strptime(start_date, "%Y-%m-%d")
         dataset = [e for e in dataset if p_start_date <= e.contest_date]

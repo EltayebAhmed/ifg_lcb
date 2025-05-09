@@ -381,13 +381,14 @@ def format_prompt_generation(
         prompt += f"{get_deepseek_r1_question_template_answer(question)}"
         return prompt
 
-    if LanguageModelStyle == LMStyle.GenericBase:
+    if LanguageModelStyle == LMStyle.GenericBase or LanguageModelStyle == LMStyle.GLLM:
         prompt = get_base_model_question_template_answer(question)
         return prompt
 
     if LanguageModelStyle == LMStyle.IFG:
         prompt = get_base_model_question_template_answer_ifg(question)
         return prompt
+
 
     raise NotImplementedError(
         f"LanguageModelStyle {LanguageModelStyle} not implemented"

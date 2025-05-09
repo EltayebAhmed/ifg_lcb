@@ -1,0 +1,14 @@
+output_dir: /data/lcb/lcb_with_tuning/ifg
+temp_min: 0.1
+temp_max: 0.7
+temp_comment_max: 1.2
+run_budget: 10
+mode: "ifg"
+seed: 42
+start_date_tune: "2024-07-01" # "2023-10-01"
+end_date_tune: "2024-08-01" # "2023-10-31"
+start_date_eval: "2024-10-01"
+end_date_eval: "2025-02-01"
+default_args: "--scenario codegeneration --evaluate --multiprocess=12 --cache_batch_size=16 --n=10 --use_cache"
+metric: "pass@10"
+server_address: "http://13.218.21.212:8181"

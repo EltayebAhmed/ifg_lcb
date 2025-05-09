@@ -16,7 +16,9 @@ def get_cache_path(model_repr:str, args) -> str:
     scenario: Scenario = args.scenario
     n = args.n
     temperature = args.temperature
-    path = f"cache/{model_repr}/{scenario}_{n}_{temperature}.json"
+    even_temp = args.ifg_even_temperature
+    odd_temp = args.ifg_odd_temperature
+    path = f"cache/{model_repr}/{scenario}_{n}_temp_{temperature}_temp_ifg_even_{even_temp}_temp_ifg_odd_{odd_temp}.json"
     ensure_dir(path)
     return path
 

@@ -196,9 +196,6 @@ def grade_call_based(
     # call-based clean up logic
     # need to wrap in try-catch logic after to catch the correct errors, but for now this is fine.
     code = import_string + "\n\n" + code
-    print('======================')
-    print(code)
-    print('======================')
     compiled_sol = compile_code(code, timeout)
 
     if compiled_sol is None:
@@ -223,8 +220,8 @@ def grade_call_based(
         try:
             # can lock here so time is useful
             start = time.time()
-            print(f'******{gt_inp=}******')
-            print(f'******{gt_out=}******')
+            # print(f'******{gt_inp=}******')
+            # print(f'******{gt_out=}******')
             prediction = method(*gt_inp)
             total_execution += time.time() - start
             signal.alarm(0)

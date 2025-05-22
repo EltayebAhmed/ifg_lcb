@@ -1,4 +1,4 @@
-output_dir: /data/lcb/lcb_with_tuning/ifg_higher
+output_dir: /data/lcb/lcb_with_tuning/ifg_global_temp
 temp_min: 0.1
 temp_max: 0.7
 temp_comment_max: 2.0

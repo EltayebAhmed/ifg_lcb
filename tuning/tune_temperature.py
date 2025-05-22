@@ -28,6 +28,7 @@ class TuneTemperature:
     default_args: str = (
         "--scenario codegeneration --evaluate --multiprocess=12 --cache_batch_size=2 --n=10"
     )
+    ifg_use_global_temperature: bool = False
     metric: str = "pass@10"
     server_address: str =  "http://52.23.181.222:8181"
 
@@ -70,10 +71,15 @@ def run_for_given_params(
     subprocess.run(command, shell=True, check=True)
 
 
-def sample_hps(min_temp: float, max_temp: float, temp_comment_max:float, mode: str, rng: np.random.RandomState):
+def sample_hps(min_temp: float, max_temp: float, temp_comment_max:float, mode: str, rng: np.random.RandomState,
+ifg_use_global_temperature: bool = False):
     if mode == "ifg":
-        temp_even = rng.uniform(low=min_temp, high=max_temp)
-        temp_odd = rng.uniform(low=temp_even, high=temp_comment_max)
+        if ifg_use_global_temperature:
+            temp_even = rng.uniform(low=min_temp, high=max_temp)
+            temp_odd = temp_even
+        else:
+            temp_even = rng.uniform(low=min_temp, high=max_temp)
+            temp_odd = rng.uniform(low=temp_even, high=temp_comment_max)
 
         directory_slug = f"ifg_temp_even_{temp_even:.2f}_odd_{temp_odd:.2f}"
         sampled_args = f"--ifg-even-temperature={temp_even:.2f} --ifg-odd-temperature={temp_odd:.2f}"
@@ -133,7 +139,8 @@ if __name__ == "__main__":
     for i in range(cfg.run_budget):
         sampled_args, directory_slug = sample_hps(
             min_temp=cfg.temp_min, max_temp=cfg.temp_max, mode=cfg.mode, rng=rng,
-            temp_comment_max=cfg.temp_comment_max
+            temp_comment_max=cfg.temp_comment_max,
+            ifg_use_global_temperature=cfg.ifg_use_global_temperature
         )
         logging.info("Step %d/%d", i + 1, cfg.run_budget)
         logging.info(f"Sampled args: {sampled_args}")

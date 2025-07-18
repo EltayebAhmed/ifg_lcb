@@ -74,6 +74,7 @@ To replicate the ablation `IFG - Equal` in Appendix G.1 of the paper
 ```bash
 >> ./experiments/ifg_shared_temp_ablation.sh
 ```
+All generations, scores and logs will be written to the  `./data` directory. Scores can be found in the `.json` files. The scripts above will fully replicate the experiments by first tuning temperatures on a validation set before running the evaluation on the test set.
 
 # Attribution
 If you use this code or the techniques described in the paper please cite

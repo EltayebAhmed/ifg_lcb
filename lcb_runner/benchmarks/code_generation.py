@@ -123,7 +123,7 @@ class CodeGenerationProblem:
 
 CACHE_PATH = "cache/data/code_generation_dataset_{hash}.pkl"
 def load_code_generation_dataset(release_version="release_v1", start_date=None, end_date=None) -> list[CodeGenerationProblem]:
-    dataset = load_dataset("livecodebench/code_generation_lite", split="test", version_tag=release_version)
+    dataset = load_dataset("livecodebench/code_generation_lite", split="test", version_tag=release_version, trust_remote_code=True)
     dataset_args_hash = f"{release_version}"
     hashed_cache_path = CACHE_PATH.format(hash=dataset_args_hash)
 

@@ -3,9 +3,10 @@
 This is a fork of [LiveCodeBench](https://github.com/LiveCodeBench/LiveCodeBench) that applies the [Intent Factored Generation](https://github.com/FLAIROx/IFG) inference time method from our [paper](https://arxiv.org/abs/2506.09659) to LiveCodeBench. 
 
 ## Introduction
-Our method Intent Factored Generation (IFG) is an inference time method that increases the diversity of repeated samples from an LLM. This improved explorations leads to higher `pass@k`, particularly for values of `k > 1`. To apply to IFG to LiveCodeBench we prompt the LLM to generate a comment before every one or two lines of code detailing what the next lines of code will do. We then sample these comments at higher temperatures than the temperatures we use for the actual code.
+Our method Intent Factored Generation (IFG) is an inference time method that increases the diversity of repeated samples from an LLM. This improved exploration leads to higher `pass@k`, particularly for values of `k > 1`. 
+To apply IFG to LiveCodeBench we prompt the LLM to generate a comment before every one or two lines of code detailing what the next lines of code will do. We then sample these comments at higher temperatures than the temperatures we use for the actual code.
 
-We those wanting to see the crux of our method without navigating a large codebase to the following [function](https://github.com/EltayebAhmed/ifg_lcb/blob/69128ebcd804e7485fe54e3744f0ed032219e1a3/lcb_runner/runner/ifg_runner.py#L177) where the crux of out method is implemented.
+For those wanting to see the crux of our method without navigating a large codebase to the following [function](https://github.com/EltayebAhmed/ifg_lcb/blob/69128ebcd804e7485fe54e3744f0ed032219e1a3/lcb_runner/runner/ifg_runner.py#L177) where the crux of our method is implemented.
 
 ## Installation
 You can clone the repository using the following command:
@@ -42,16 +43,16 @@ uv pip install -e .
 To reproduce the results in Table 1 in our ArXiv paper you need to carry out the following steps.
 
 ## 1. Launch an OpenAI compatible server
-Set launch a OpenAI API compatible server running IFG running `Qwen/Qwen2.5-Coder-32B`.
+Launch an OpenAI API compatible server running IFG running `Qwen/Qwen2.5-Coder-32B`.
 You can do this either using a `vllm` ([instructions here](https://docs.vllm.ai/en/latest/serving/openai_compatible_server.html)) or you can use our packaged tool, gllm, to launch a server from the command line as follows.
 To launch a gllm server to use GPUs 0-7 run the following command
 ```bash
 >> gllm start-cluster -w 0:7 -wp 12000 --port 8181
 ```
 This will start a gllm server with one worker using the GPUs 0-7. 
-The  the worker will use a random port between 12000 and 12100 and the main server (which is OpenAI API compatible) will be accessible at `localhost:8181` and `0.0.0.0:8181`.
+The worker will use a random port between 12000 and 12100 and the main server (which is OpenAI API compatible) will be accessible at `localhost:8181` and `0.0.0.0:8181`.
 
-If you bring your own server and it is not at `localhost:8181` please change the `.yaml` files in `tuning` to point to your server. If you server requires an API key please the environment variable GLLM_API_KEY as follows
+If you bring your own server and it is not at `localhost:8181` please change the `.yaml` files in `tuning` to point to your server. If your server requires an API key please set the environment variable GLLM_API_KEY as follows
 ```bash
 >> export GLLM_API_KEY=<your_api_key>
 ```

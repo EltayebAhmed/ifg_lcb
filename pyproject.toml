@@ -17,6 +17,9 @@ dependencies = [
     "vllm>=0.5.0.post1",
     "together>=0.21.0",
     "tyro",
+    "cattrs",
+    "yaml",
+    "transformers",
     "gllm @ git+https://github.com/EltayebAhmed/gllm.git"
 ]
 

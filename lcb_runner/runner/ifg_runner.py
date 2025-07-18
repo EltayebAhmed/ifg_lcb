@@ -173,7 +173,7 @@ class GLLMMRunnerIFG(BaseRunner):
         results = [VLLMLookingOutput(result) for result in results]
         return results
 
-
+# This function implements the crux of our IFG sampling method.
 def ifg_sample_single(
     sampling_params: SamplingParams,
     prompt: str,
@@ -184,16 +184,38 @@ def ifg_sample_single(
     model_name: str,
     ifg_termination_str: str,
 ) -> str:
+    """
+    This function implements the crux of our IFG sampling method.
+
+    It samples an solution to a single coding question. This solution
+    consists of multiple alternating comment blocks and code blocks.
+    Args:
+        sampling_params: The sampling parameters for the model.
+        prompt: The prompt to the model, this includes the few shot examples
+            and the question to solve.
+        model: API handle to query LLM server.
+        separator: The string separator between comment blocks and code blocks.
+        even_temperature: The temperature to use for even steps.
+        odd_temperature: The temperature to use for odd steps.
+        model_name: The string identifier of the model to use.
+        ifg_termination_str: The string that indicates the end of a the solution.
+    Returns:
+        A string containing the solution to the question.
+    """
     token_budget = sampling_params.max_tokens
     response = ""
 
+    # As we alternate between generating comments and code,
+    # we alternate sampling the sampling temperature between
+    # the even and odd temperatures.
     temperatures = [even_temperature, odd_temperature]
     temperatures = itertools.cycle(temperatures)
 
     for temperature in temperatures:
 
+        # This function samples a single step each time it is called,
+        # either one comment block or one code block.
         gllm_response = model.get_completions(
-            # model=model_name,
             model=MODEL,
             prompt=prompt + response,
             max_tokens=token_budget,
@@ -206,10 +228,22 @@ def ifg_sample_single(
             return_mode="raw",
         )
 
+        # We add the step we just generated to the response
+        # variable, which contains concatenation of all the
+        # generated response steps so far.
         response += gllm_response.choices[0].text
+
+        # We add the separator to the response, which is the
+        # string that separates the comment and code blocks.
+        # In our case is is `###`.
         response += separator
+
+        # We deduct the number of tokens used for this step
+        # from the token budget, so we do not generate more tokens
+        # than the maximum allowed.
         used_tokens = gllm_response.usage.completion_tokens
         token_budget -= used_tokens
+
         if token_budget <= 0 or ifg_termination_str in response:
             break
 

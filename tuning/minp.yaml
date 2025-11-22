@@ -1,0 +1,15 @@
+output_dir: /data/acl_rebuttals/lcb/lcb_with_tuning/minp_tuning
+temp_min: 0.0
+temp_max: 1.0
+min_p_min: 0.0
+min_p_max: 1.0
+run_budget: 10
+mode: "min_p"
+seed: 42
+start_date_tune: "2024-10-01"
+end_date_tune: "2024-12-01"
+start_date_eval: "2025-01-01"
+end_date_eval: "2025-05-01"
+default_args: "--scenario codegeneration --evaluate --multiprocess=64 --cache_batch_size=16 --n=10 --use_cache"
+metric: "pass@10"
+server_address: "http://localhost:8181"

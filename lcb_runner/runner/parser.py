@@ -65,6 +65,7 @@ def get_args():
         "--temperature", type=float, default=0.2, help="Temperature for sampling"
     )
     parser.add_argument("--top_p", type=float, default=0.95, help="Top p for sampling")
+    parser.add_argument("--min_p", type=float, default=0.0, help="Min p for sampling")
     parser.add_argument(
         "--max_tokens", type=int, default=2000, help="Max tokens for sampling"
     )

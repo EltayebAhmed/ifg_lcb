@@ -17,6 +17,8 @@ class TuneTemperature:
     temp_min: float = 0.1
     temp_max: float = 0.7
     temp_comment_max: float = 1.2
+    min_p_min: float = 0.0
+    min_p_max: float = 1.0
     run_budget: int = 10
     mode: str = "ifg"
     seed: int = 42
@@ -33,12 +35,16 @@ class TuneTemperature:
     server_address: str =  "http://52.23.181.222:8181"
 
     def __post_init__(self):
-        if self.mode not in ["ifg", "direct"]:
-            raise ValueError("mode must be either 'ifg' or 'direct'")
+        if self.mode not in ["ifg", "direct", "min_p"]:
+            raise ValueError("mode must be either 'ifg', 'direct', or 'min_p'")
         if self.temp_min < 0 or self.temp_max < 0:
             raise ValueError("temp_min and temp_max must be non-negative")
         if self.temp_min >= self.temp_max:
             raise ValueError("temp_min must be less than temp_max")
+        if self.min_p_min < 0 or self.min_p_max < 0:
+            raise ValueError("min_p_min and min_p_max must be non-negative")
+        if self.min_p_min >= self.min_p_max:
+            raise ValueError("min_p_min must be less than min_p_max")
         if self.run_budget <= 0:
             raise ValueError("run_budget must be a positive integer")
 
@@ -61,6 +67,8 @@ def run_for_given_params(
         model_arg = "--model generic-ifg-model"
     elif mode == "direct":
         model_arg = "--model generic-vanilla-gllm"
+    elif mode == "min_p":
+        model_arg = "--model generic-vanilla-gllm"
     else:
         raise ValueError("Invalid mode")
     custom_args = f" {model_arg} --start_date {start_date} --end_date {end_date}"
@@ -72,7 +80,7 @@ def run_for_given_params(
 
 
 def sample_hps(min_temp: float, max_temp: float, temp_comment_max:float, mode: str, rng: np.random.RandomState,
-ifg_use_global_temperature: bool = False):
+ifg_use_global_temperature: bool = False, min_p_min: float = 0.0, min_p_max: float = 1.0):
     if mode == "ifg":
         if ifg_use_global_temperature:
             temp_even = rng.uniform(low=min_temp, high=max_temp)
@@ -87,6 +95,11 @@ ifg_use_global_temperature: bool = False):
         temp = rng.uniform(low=min_temp, high=max_temp)
         directory_slug = f"temp_{temp:.2f}"
         sampled_args = f"--temperature={temp:.2f}"
+    elif mode == "min_p":
+        temp = rng.uniform(low=min_temp, high=max_temp)
+        min_p = rng.uniform(low=min_p_min, high=min_p_max)
+        directory_slug = f"temp_{temp:.2f}_minp_{min_p:.2f}"
+        sampled_args = f"--temperature={temp:.2f} --min_p={min_p:.2f}"
     else:
         raise ValueError("Invalid mode")
     return sampled_args, directory_slug
@@ -140,7 +153,8 @@ if __name__ == "__main__":
         sampled_args, directory_slug = sample_hps(
             min_temp=cfg.temp_min, max_temp=cfg.temp_max, mode=cfg.mode, rng=rng,
             temp_comment_max=cfg.temp_comment_max,
-            ifg_use_global_temperature=cfg.ifg_use_global_temperature
+            ifg_use_global_temperature=cfg.ifg_use_global_temperature,
+            min_p_min=cfg.min_p_min, min_p_max=cfg.min_p_max
         )
         logging.info("Step %d/%d", i + 1, cfg.run_budget)
         logging.info(f"Sampled args: {sampled_args}")
